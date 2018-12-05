@@ -1,0 +1,13 @@
+.video-box{
+
+    position: relative;
+
+
+}
+.danmu-box{
+
+     height: 400px;
+    width: 960px;
+
+    position: absolute;
+}

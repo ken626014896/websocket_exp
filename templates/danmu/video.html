@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'danmu/css/video.css' %}">
+
+</head>
+<body>
+  <div  id="video-box" class="video-box"  >
+      <div id='danmu-box' class="danmu-box"></div>
+      <video id="video" controls autoplay="autoplay" muted>
+            <source src="http://vjs.zencdn.net/v/oceans.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+      </video>
+  </div>
+
+   <div  class="danmu-input">
+       <input   style="float: left" type="text" id="danmutext">
+       <button  style="float: left" id ='btn'>发送弹幕</button>
+       <button  style="float: left" id ='btn1'>测试</button>
+   </div>
+</body>
+<script type="text/javascript" src="{% static 'danmu/js/jquery-1.11.3.min.js' %}"></script>
+ <script type="text/javascript">
+
+
+    $(document).ready(function(){
+          var currenttime
+
+            $("#video").on(
+            "timeupdate",
+            function(event){
+                 currenttime=this.currentTime
+
+
+                var socket = new WebSocket("ws://" + window.location.host + "/getdanmu/");
+               socket.onopen = function () {
+               socket.send(currenttime);//发送数据到服务端
+                  }
+               socket.onmessage = function (e) {
+                   var a_str=e.data;
+                   var a_hint=  a_str.indexOf(":");
+                   var a_len=a_str.length
+
+
+
+                console.log('返回弹幕id: ' + a_str.substring(0,a_hint));//打印服务端返回的数据
+                   console.log('返回弹幕内容: ' + a_str.substring(a_hint,a_len));
+        }
+
+
+           });
+
+
+           $("#video").on(
+            "play",
+            function(event){
+
+
+                console.log('start')
+            });
+           $("#video").on(
+            "pause",
+            function(event){
+
+                 console.log('pause')
+
+            });
+
+
+
+          $('#btn').click(function () {
+
+              alert(currenttime)
+            {#  var danmutext=$('#danmutext').val()#}
+            {#  console.log(danmutext)#}
+            {#  var randomTop=parseInt(Math.random()*380+1);#}
+            {#  var htmlstr="<b id='danmu' style='position: absolute;right:0px;top:"+ randomTop+"px;color: white;'>"+danmutext+"</b>"#}
+            {#$("#danmu-box").append(htmlstr);#}
+          }
+          )
+
+           $("#btn1").click(function(){
+                 var wight= $ ('#danmu').width()
+
+                 var aniSite=(960-wight)+'px'
+              $ ('#danmu').animate (
+                {
+                    right : aniSite
+                }, 2000);
+
+            });
+
+
+
+
+
+    });
+
+</script>
+</html>
