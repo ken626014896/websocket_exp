@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load staticfiles %}
+    <title>Title</title>
+      <link href="{% static 'danmu/css/scojs.css' %}" rel="stylesheet">
+
+   <link href="{% static 'danmu/css/colpick.css' %}" rel="stylesheet">
+   <link href="{% static 'danmu/css/bootstrap.css' %}" rel="stylesheet">
+   <link rel="stylesheet" href="{% static 'danmu/css/main.css' %}">
+    <link>
+</head>
+<body>
+
+<div id="danmup"></div>
+
+<button  id="btn">测试</button>
+
+</body>
+
+<script src={% static 'danmu/js/jquery-2.1.4.min.js' %}></script>
+<script src={% static 'danmu/js/jquery.shCircleLoader.js' %}></script>
+<script src={% static 'danmu/js/sco.tooltip.js' %}></script>
+<script src={% static 'danmu/js/colpick.js' %}></script>
+<script src={% static 'danmu/js/jquery.danmu.js' %}></script>
+<script src='{% static 'danmu/js/main.js' %}'></script>
+<!--<script src="../dist/js/danmuplayer.min.js"></script>-->
+<script>
+
+
+$(document).ready(function(){
+          var currenttime
+
+        //创建视频框
+              $("#danmup").DanmuPlayer({
+                src:"http://vjs.zencdn.net/v/oceans.mp4",
+                height: "400px", //区域的高度
+                width: "960px", //区域的宽度
+
+              });
+
+          //创建连接到服务器
+             var socket = new WebSocket("ws://" + window.location.host + "/getdanmu/");
+               socket.onopen = function () {
+                     console.log('连接到服务器');
+                  }
+               socket.onclose = function(){
+                   console.log("连接关闭！");
+                    socket.close(); //关闭连接
+                };
+               socket.onerror = function(){
+                   console.log("连接错误");
+
+                };
+
+               socket.onmessage = function (e) {
+                   var a_str=e.data;
+                   var a_hint=  a_str.indexOf(":");
+                   var a_len=a_str.length
+
+
+                   producedanmu(a_str.substring(0,a_hint),a_str.substring(a_hint+1,a_len))
+        }
+
+            function producedanmu(danmuid,danmucontext){
+
+                console.log('弹幕id: ' + danmuid);//打印服务端返回的数据
+                console.log('弹幕内容: ' + danmucontext);
+                    //生成弹幕
+                var position_items = ['0','1','2'];
+                var color_items = ['red','blue','orange','yellow','black','green','white'];
+                var random_position = position_items[Math.floor(Math.random()*position_items.length)];
+                var random_color = color_items[Math.floor(Math.random()*color_items.length)];
+                var danmutine=parseInt(currenttime*10)+3
+               $("#danmup .danmu-div").danmu("addDanmu",
+                    { "text":danmucontext ,color:random_color,size:1,position:random_position,time:danmutine}
+
+                    )
+
+
+
+
+
+            }
+
+
+       //监听视频进度
+     $("#danmup .danmu-video").on(
+            "timeupdate",
+            function(event){
+                currenttime=this.currentTime
+                var data='g:'+currenttime
+                {#console.log(data)#}
+               socket.send(data);//发送数据到服务端
+           });
+
+
+   $('.send-btn').click(function () {
+       var danmutext=$('#danmu_text').val()
+       var data='a:'+danmutext+':'+currenttime
+
+               socket.send(data);//发送数据到服务端
+
+   })
+  {#$("#danmup .danmu-div").danmu("addDanmu",[#}
+  {#  { "text":"这是滚动弹幕" ,color:"white",size:1,position:0,time:2}#}
+  {#  ,{ "text":"我是帽子绿" ,color:"green",size:1,position:0,time:3}#}
+  {#  ,{ "text":"哈哈哈啊哈" ,color:"black",size:1,position:0,time:10}#}
+  {#  ,{ "text":"这是顶部弹幕" ,color:"yellow" ,size:1,position:1,time:3}#}
+  {#  ,{ "text":"这是底部弹幕" , color:"red" ,size:1,position:2,time:9}#}
+  {#  ,{ "text":"大家好，我是伊藤橙" ,color:"orange",size:1,position:1,time:3}#}
+  {##}
+  {#])#}
+
+
+
+        });
+</script>
+</html>
