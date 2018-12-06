@@ -29,15 +29,10 @@
     $(document).ready(function(){
           var currenttime
 
-            $("#video").on(
-            "timeupdate",
-            function(event){
-                 currenttime=this.currentTime
 
-
-                var socket = new WebSocket("ws://" + window.location.host + "/getdanmu/");
+            var socket = new WebSocket("ws://" + window.location.host + "/getdanmu/");
                socket.onopen = function () {
-               socket.send(currenttime);//发送数据到服务端
+                     console.log('连接到服务器');
                   }
                socket.onmessage = function (e) {
                    var a_str=e.data;
@@ -45,11 +40,43 @@
                    var a_len=a_str.length
 
 
-
-                console.log('返回弹幕id: ' + a_str.substring(0,a_hint));//打印服务端返回的数据
-                   console.log('返回弹幕内容: ' + a_str.substring(a_hint,a_len));
+                   producedanmu(a_str.substring(0,a_hint),a_str.substring(a_hint+1,a_len))
         }
 
+            function producedanmu(danmuid,danmucontext){
+
+                console.log('弹幕id: ' + danmuid);//打印服务端返回的数据
+                console.log('弹幕内容: ' + danmucontext);
+                    //生成弹幕
+              var randomTop=parseInt(Math.random()*380+1);
+              var htmlstr="<b id='"+danmuid+"' style='position: absolute;right:0px;top:"+ randomTop+"px;color: white;'>"+danmucontext+"</b>"
+             $("#danmu-box").append(htmlstr);
+
+
+                var wight= $ ('#'+danmuid).width()
+
+                 var aniSite=(960-wight)+'px'
+                 danmuanim(danmuid,aniSite)
+             
+            }
+            // 滑动
+              function danmuanim(danmuid,offSet){
+
+                      $ ('#'+danmuid).animate (
+                    {
+                        right : offSet
+                    }, 5000,function () {
+                           $ ('#'+danmuid).remove()
+                      });
+              }
+
+
+            $("#video").on(
+            "timeupdate",
+            function(event){
+                currenttime=this.currentTime
+
+               socket.send(currenttime);//发送数据到服务端
 
            });
 
@@ -61,11 +88,13 @@
 
                 console.log('start')
             });
+
+
            $("#video").on(
             "pause",
             function(event){
 
-                 console.log('pause')
+             $("#danmu-box").children('b').css('animation-play-state','paused')
 
             });
 
