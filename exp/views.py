@@ -11,6 +11,7 @@ def home(request):
 def echo_once(request):
     #两种接受客户端信息的方法
     message = request.websocket.wait()
+    for a in range(0,10) :
 
-    request.websocket.send(message)
+     request.websocket.send(message)
     # request.websocket.send(mes.encode(encoding='utf-8'))
